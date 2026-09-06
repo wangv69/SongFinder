@@ -2,18 +2,23 @@ import {useState} from 'react'
 
 function App(){
   const [lyrics, setLyrics] = useState("");
+  const [songData, setSongData] = useState(null)
   const [backendMessage, setBackendMessage] = useState("");
 
   async function handleSearch(){
     console.log("Searching for", lyrics)
+    setSongData(null);
+    setBackendMessage("");
 
     try{
       const response = await fetch(`http://127.0.0.1:5001/?query=${encodeURIComponent(lyrics)}`);
       const data = await response.json();
-      setBackendMessage(data.message);
+
+      if(response.ok){
+        setSongData(data);
+      }
     }catch(error) {
       console.error("Error connecting to Flask:", error);
-      setBackendMessage("Failed to connect to backend.");
     }
   }
 
@@ -40,8 +45,16 @@ function App(){
 
       {backendMessage && (
         <p className="mt-8 text-2xl text-green-600 font-medium">
-          Backend says: {backendMessage}
+          {backendMessage}
         </p>
+      )}
+
+      {songData && (
+        <div className="mt-8 flex flex-col items-center">
+          <p className="text-2xl text-green-600 font-medium mb-4">
+            Found: {songData.title} by {songData.artist}
+          </p>
+        </div>
       )}
     </div>
   )
